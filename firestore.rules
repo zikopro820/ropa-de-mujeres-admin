@@ -1,0 +1,55 @@
+rules_version = '2';
+// =========================================================
+// NARA (tienda de ropa) — Reglas de seguridad de Firestore
+// Pega TODO este archivo en Firebase → Firestore → Reglas → Publicar.
+// Los correos deben ser los MISMOS de firebase-config.js (equipo) del panel.
+// =========================================================
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function equipo() {
+      return request.auth != null && request.auth.token.email in [
+        'admin@naramoda.pe',
+        'ventas@naramoda.pe'
+      ];
+    }
+    function admin() {
+      return request.auth != null && request.auth.token.email in ['admin@naramoda.pe'];
+    }
+    function d() { return request.resource.data; }
+
+    // ---------- Tienda pública (la web lo lee) ----------
+    match /ajustes/{id}    { allow read: if true; allow write: if admin(); }
+    match /categorias/{id} { allow read: if true; allow write: if admin(); }
+    match /productos/{id}  { allow read: if true; allow write: if equipo(); }
+    match /fotos_prod/{id} { allow read: if true; allow write: if equipo(); }   // fotos extra de cada prenda (hasta 3 más)
+
+    // ---------- Pedidos ----------
+    match /pedidos/{id} {
+      allow get: if true;                    // el cliente sigue su pedido con su código
+      allow list, update, delete: if equipo();
+      allow create: if equipo() || (
+        d().keys().hasOnly(['codigo', 'items', 'subtotal', 'envio', 'total', 'entrega', 'zona', 'direccion', 'referencia', 'nombre', 'celular', 'doc',
+          'comprobante', 'pago', 'banco', 'monto', 'operacion', 'montoLeido', 'coincide', 'fechaOk', 'estado', 'origen', 'creado'])
+        && d().codigo == id && d().origen == 'web' && d().estado in ['por-validar', 'nuevo']
+        && d().items is list && d().items.size() > 0 && d().items.size() <= 80
+        && d().total is number && d().total > 0 && d().nombre is string && d().nombre.size() <= 80
+        && (d().estado == 'nuevo') == (d().pago == 'Contra entrega'));
+    }
+    // Captura del pago (solo el equipo la ve)
+    match /capturas/{id} {
+      allow read, update, delete: if equipo();
+      allow create: if equipo() || (
+        d().keys().hasOnly(['pedido', 'captura']) && d().pedido == id
+        && existsAfter(/databases/$(database)/documents/pedidos/$(id))
+        && d().captura is string && d().captura.size() < 900000);
+    }
+    // Mensajes y cotizaciones del formulario de contacto
+    match /mensajes/{id} {
+      allow read, update, delete: if equipo();
+      allow create: if d().keys().hasOnly(['nombre', 'telefono', 'asunto', 'mensaje', 'estado', 'creado'])
+        && d().estado == 'nuevo' && d().mensaje is string && d().mensaje.size() <= 1500;
+    }
+    match /movimientos/{id} { allow read, write: if equipo(); }
+  }
+}

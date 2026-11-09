@@ -1,0 +1,43 @@
+NARA (TIENDA DE ROPA) — CÓMO CONFIGURAR (web + panel)
+=====================================================
+
+REPOSITORIOS
+  • El de tu web «ropa-de-mujeres» (el que ya tienes) → sube TODO lo de ropa-de-mujeres-web.zip
+    (reemplaza los archivos; hay archivos NUEVOS: firebase-config.js, semilla.js, tienda.js,
+    pedido.html y mis-compras.html)
+  • Uno NUEVO para el panel, por ejemplo «ropa-de-mujeres-admin» → sube ropa-de-mujeres-admin.zip
+  En los dos: Settings → Pages → Branch: main → Save.
+
+1. REVISA TU firebaseConfig
+   Lo copié de tu foto. Abre firebase-config.js (en los DOS) y compara la línea apiKey con la de Firebase
+   (Configuración del proyecto → Tus apps). Si un solo carácter no coincide, no conecta.
+
+2. DIRECCIÓN DE TU WEB EN EL PANEL
+   En firebase-config.js del panel, «web:» debe ser la dirección real de tu tienda
+   (puse https://zikopro820.github.io/ropa-de-mujeres). Se usa en los enlaces y QR de seguimiento.
+
+3. FIRESTORE Y REGLAS
+   Firebase → Firestore Database → Crear base de datos (si aún no existe) → Reglas → pega firestore.rules → Publicar.
+
+4. USUARIOS (Authentication → Users → Agregar usuario)
+   admin@naramoda.pe  (todo)  ·  ventas@naramoda.pe  (vendedora)
+   ¿Otros correos? Cámbialos en firebase-config.js del panel (equipo) Y en firestore.rules.
+   Authentication → Configuración → Dominios autorizados → agrega zikopro820.github.io
+
+5. PRIMERA VEZ
+   Entra al panel como admin → «Ajustes de la web» → «Cargar ejemplos».
+   Luego cambia todo por tus datos: logo, WhatsApp, banners, zonas de envío, QR de Yape/Plin,
+   cuentas bancarias, y en «Productos y stock» tus prendas reales con hasta 4 fotos, tallas y stock por talla.
+
+EL DÍA A DÍA
+  • Cada prenda tiene sus tallas y su stock POR TALLA (ej. S: 3 · M: 5 · L: 0). La talla sin stock sale
+    tachada en la web y no se puede comprar. «Reponer» suma lo que llegó de cada talla.
+  • Pedidos web: llega con sonido. Si pagó con Yape/Plin/transferencia, ves su captura → revisa tu app
+    → «Validar». Luego «Preparar» (baja el stock de esa talla), «Enviar» y «Entregado».
+    En cada paso se abre WhatsApp con el mensaje listo para la clienta.
+  • Contra entrega: al marcar «Entregado» eliges cómo pagó y entra a Caja.
+  • Venta en tienda: tocas la prenda, eliges la talla y cobras (ticket de 80 mm o recibo A5).
+  • La clienta ve sus compras en «Mis compras» y descarga su recibo en PDF.
+  • En «Clientes» ves todas las compras y recibos de cada clienta. Ahí y en cada pedido puedes anotar
+    el N° de boleta o factura electrónica.
+  • El recibo NO reemplaza la boleta o factura electrónica de SUNAT.
